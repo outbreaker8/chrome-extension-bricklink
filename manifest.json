@@ -8,7 +8,7 @@
   "icons": {
     "48": "icon.png"
   },
-
+	
   "permissions": ["tabs", "*://*.bricklink.com/*"],
 
   "content_scripts": [
@@ -16,5 +16,7 @@
       "matches": ["*://*.bricklink.com/orderReceived.asp*"],
       "js": ["fee.js"]
     }
-  ]
+  ],
+  
+  "web_accessible_resources": ["feeStyles.css", "feeScript.js"]
 }
