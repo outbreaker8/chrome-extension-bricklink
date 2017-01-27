@@ -1,3 +1,11 @@
+
+//utility to get deep property pathes
+get = function(obj, key) {
+    return key.split(".").reduce(function(o, x) {
+        return (typeof o == "undefined" || o === null) ? o : o[x];
+    }, obj);
+}
+
 //inject css
 var style = document.createElement('link');
 style.rel = 'stylesheet';
@@ -24,6 +32,11 @@ divContent.className = "modal-content";
 divContent.innerHTML = "Hello";
 div.appendChild(divContent);
 
+var span = document.createElement("span");
+span.className = "feeInfoClose";
+divContent.innerHTML = "&times;";
+divContent.appendChild(span);
+
 document.getElementById("brick-link").appendChild(div);
 
 // When the user clicks anywhere outside of the modal, close it
@@ -40,11 +53,38 @@ var orders = document.getElementsByClassName('tableT1');
 for (var i = 0, row; row = orders[0].rows[i]; i++) {
 
     for (var j = 0, col; col = row.cells[j]; j++) {
-        //iterate through columns
-        //columns would be accessed using the "col" variable assigned in the for loop
+
+        // scan header lines
+        if ( i === 0) {
+            switch(get(col, 'firstChild.firstChild.data')) {
+                case "ID":
+                    var colID = j;
+                    break;
+                case "Buyer":
+                    var colBuyer = j;
+                    break;
+                case "Ship.":
+                    var colShipping = j;
+                    break;
+                case "Grand":
+                    var colTotal = j;
+                    break;
+                case "Order Status":
+                    var colStatus = j;
+                    break;
+                case "Date":
+                    var colDate = j;
+                    break;
+                case "":
+                    break;
+                default:
+                    //console.log(get(col, 'firstChild.firstChild.data'));
+            }
+        }
+
+        // store the order ID for everything after the first row
         if (j === 0 && i > 0) {
-            console.log(col);
-//    	var name = col.
+            var orderID = col.firstChild.name;
         }
     }
 
@@ -55,11 +95,13 @@ for (var i = 0, row; row = orders[0].rows[i]; i++) {
         newCell.innerHTML = 'Add Paypal';
     } else {
         var newCell = row.insertCell(-1);
-        newCell.innerHTML = '<img width="16" height="16" src="/images/invoice16N.gif" alt="Invoice" title="Invoice" border="0" align="ABSMIDDLE" onclick = "openInfo()">';
+        newCell.innerHTML = '<img width="16" height="16" src="/images/invoice16N.gif" alt="Invoice" title="Invoice" border="0" align="ABSMIDDLE" onclick = "openInfo(\'' + orderID + '\')">';
     }
 
 
 }
+
+
 
 
 

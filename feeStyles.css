@@ -20,6 +20,18 @@
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
 }
+.modal-content input {
+    display:inline-block;
+    width: 40%;
+    clear: both;
+}
+.modal-content label {
+    display:inline-block;
+    width:120px;
+    margin-left:5px;
+    width: 20%;
+    clear: both;
+}
 
 /* The Close Button */
 .close {
@@ -34,4 +46,8 @@
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+.feeLabel {
+    font-size: 200%;
 }
