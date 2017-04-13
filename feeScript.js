@@ -107,7 +107,7 @@ function getColDefinition() {
             case "Grand":
                 cols.total = j;
                 break;
-            case "Order Status":
+            case "Order Status ":
                 cols.status = j;
                 break;
             case "Date":
