@@ -92,7 +92,7 @@ for (var i = 0, row; row = orders[0].rows[i]; i++) {
     if (i === 0) {
         var newCell = row.insertCell(-1);
         //newCell.innerHTML = '[td] row:' + i + ', cell: ' + (tblBodyObj.rows[i].cells.length - 1)
-        newCell.innerHTML = 'Add Paypal';
+        newCell.innerHTML = 'Calculate Paypal';
     } else {
         var newCell = row.insertCell(-1);
         newCell.innerHTML = '<img width="16" height="16" src="/images/invoice16N.gif" alt="Invoice" title="Invoice" border="0" align="ABSMIDDLE" onclick = "openInfo(\'' + orderID + '\')">';

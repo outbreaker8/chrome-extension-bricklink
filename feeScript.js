@@ -107,7 +107,8 @@ function getColDefinition() {
             case "Grand":
                 cols.total = j;
                 break;
-            case "Order Status ":
+            case "Order Status ": // _space_ seems to be an error on the new status page
+            case "Order Status":
                 cols.status = j;
                 break;
             case "Date":
