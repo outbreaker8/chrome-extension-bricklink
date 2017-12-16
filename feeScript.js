@@ -11,11 +11,11 @@ function openInfo(orderID) {
     var row = rowCandidates[0].parentElement.parentElement;
     var cols = getColDefinition();
 
-    newLine("Order ID", cols.id, "orderId", row);
-    newLine("Buyer", cols.buyer, "buyer", row);
-    newLine("Status", cols.status, "status", row);
-    newLine("Shipping Cost", cols.shipping, "shipping", row);
-    newLine("Current Grand Total", cols.total, "total", row);
+    newLine("Order ID", cols.id, "ID", row);
+    newLine("Buyer", cols.buyer, "Buyer", row);
+    newLine("Status", cols.status, "Order Status ", row);
+    newLine("Shipping Cost", cols.shipping, "Ship.", row);
+    newLine("Current Grand Total", cols.total, "Grand", row);
 
     //calculate fee
     var countryLow = ["Germany", "Belgium", "Bulgaria", "Croatia", "Denmark", "Estonia", "Finland", "France",
@@ -75,8 +75,9 @@ function newLine(text, col, name, row) {
     var i = document.createElement("input");
     i.setAttribute('type', "text");
     i.setAttribute('name', name);
+
     var value = row.cells[col].innerHTML.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, ' ');
-    if (value == "") {
+    if ((value == "") || (name == "Order Status ")) {
         //could be input field
         value = row.cells[col].firstChild.value;
     }
@@ -89,37 +90,36 @@ function newLine(text, col, name, row) {
 
 function getColDefinition() {
     //Assumption: only one table found
-    var orders = document.getElementsByClassName('tableT1');
+    var orders = document.getElementsByClassName('tableT1')[0];
     var cols = new Object();
-    for (var j = 0, col; col = orders[0].rows[0].cells[j]; j++) {
+    for (var j = 0, col; col = orders.rows[0].cells[j]; j++) {
 
-        // scan header lines
-        switch (get(col, 'firstChild.firstChild.data')) {
+
+        switch(get(col, 'firstChild.firstChild.data')) {
             case "ID":
-                cols.id = j;
+                cols.id = getActualCellIndex(orders, col);
                 break;
             case "Buyer":
-                cols.buyer = j;
+                cols.buyer = getActualCellIndex(orders, col);
                 break;
             case "Ship.":
-                cols.shipping = j;
+                cols.shipping = getActualCellIndex(orders, col);
                 break;
             case "Grand":
-                cols.total = j;
+                cols.total = getActualCellIndex(orders, col);
                 break;
             case "Order Status ": // _space_ seems to be an error on the new status page
             case "Order Status":
-                cols.status = j;
+                cols.status = getActualCellIndex(orders, col);
                 break;
             case "Date":
-                cols.date = j;
+                cols.date = getActualCellIndex(orders, col);
                 break;
             case "":
             case null:
                 break;
             default:
-            //var text = get(col, 'firstChild.firstChild.data');
-            //console.log(text);
+                //console.log(get(col, 'firstChild.firstChild.data'));
         }
     }
     return cols;
@@ -130,4 +130,45 @@ function get(obj, key) {
     return key.split(".").reduce(function (o, x) {
         return (typeof o == "undefined" || o === null) ? o : o[x];
     }, obj);
+}
+
+//utility to get the right cellindex even with colspan
+function computeTableHeaderCellIndexes(t) {
+	var matrix = [];
+	var lookup = {};
+	var trs = t.getElementsByTagName('TR');
+	for (var i=0; i<trs.length; i++) {
+	    //check if maybe not a real line. Currently all other lines have className
+	    if (trs[i].className == "") { continue; }
+		var cells = trs[i].cells;
+		for (var j=0; j<cells.length; j++) {
+			var c = cells[j];
+			var rowIndex = c.parentNode.rowIndex;
+			var cellId = rowIndex+"-"+c.cellIndex;
+			var rowSpan = c.rowSpan || 1;
+			var colSpan = c.colSpan || 1
+			var firstAvailCol;
+			if(typeof(matrix[rowIndex])=="undefined") { matrix[rowIndex] = []; }
+			// Find first available column in the first row
+			for (var k=0; k<matrix[rowIndex].length+1; k++) {
+				if (typeof(matrix[rowIndex][k])=="undefined") {
+					firstAvailCol = k;
+					break;
+				}
+			}
+			lookup[cellId] = firstAvailCol;
+			for (var k=rowIndex; k<rowIndex+rowSpan; k++) {
+				if(typeof(matrix[k])=="undefined") { matrix[k] = []; }
+				var matrixrow = matrix[k];
+				for (var l=firstAvailCol; l<firstAvailCol+colSpan; l++) {
+					matrixrow[l] = "x";
+				}
+			}
+		}
+	}
+	return lookup;
+}
+
+function getActualCellIndex(table, cell) {
+	return computeTableHeaderCellIndexes(table)[cell.parentNode.rowIndex+"-"+cell.cellIndex];
 }

@@ -5,6 +5,46 @@ get = function(obj, key) {
         return (typeof o == "undefined" || o === null) ? o : o[x];
     }, obj);
 }
+//utility to get the right cellindex even with colspan
+function computeTableHeaderCellIndexes(t) {
+	var matrix = [];
+	var lookup = {};
+	var trs = t.getElementsByTagName('TR');
+	for (var i=0; i<trs.length; i++) {
+	    //check if maybe not a real line. Currently all other lines have className
+	    if (trs[i].className == "") { continue; }
+		var cells = trs[i].cells;
+		for (var j=0; j<cells.length; j++) {
+			var c = cells[j];
+			var rowIndex = c.parentNode.rowIndex;
+			var cellId = rowIndex+"-"+c.cellIndex;
+			var rowSpan = c.rowSpan || 1;
+			var colSpan = c.colSpan || 1
+			var firstAvailCol;
+			if(typeof(matrix[rowIndex])=="undefined") { matrix[rowIndex] = []; }
+			// Find first available column in the first row
+			for (var k=0; k<matrix[rowIndex].length+1; k++) {
+				if (typeof(matrix[rowIndex][k])=="undefined") {
+					firstAvailCol = k;
+					break;
+				}
+			}
+			lookup[cellId] = firstAvailCol;
+			for (var k=rowIndex; k<rowIndex+rowSpan; k++) {
+				if(typeof(matrix[k])=="undefined") { matrix[k] = []; }
+				var matrixrow = matrix[k];
+				for (var l=firstAvailCol; l<firstAvailCol+colSpan; l++) {
+					matrixrow[l] = "x";
+				}
+			}
+		}
+	}
+	return lookup;
+}
+
+function getActualCellIndex(table, cell) {
+	return computeTableHeaderCellIndexes(table)[cell.parentNode.rowIndex+"-"+cell.cellIndex];
+}
 
 //inject css
 var style = document.createElement('link');
@@ -46,11 +86,10 @@ window.onclick = function (event) {
     }
 }
 
-var orders = document.getElementsByClassName('tableT1');
-
+var orders = document.getElementsByClassName('tableT1')[0];
 
 //Assumption: only one table found
-for (var i = 0, row; row = orders[0].rows[i]; i++) {
+for (var i = 0, row; row = orders.rows[i]; i++) {
 
     for (var j = 0, col; col = row.cells[j]; j++) {
 
@@ -58,22 +97,22 @@ for (var i = 0, row; row = orders[0].rows[i]; i++) {
         if ( i === 0) {
             switch(get(col, 'firstChild.firstChild.data')) {
                 case "ID":
-                    var colID = j;
+                    var colID = getActualCellIndex(orders, col);
                     break;
                 case "Buyer":
-                    var colBuyer = j;
+                    var colBuyer = getActualCellIndex(orders, col);
                     break;
                 case "Ship.":
-                    var colShipping = j;
+                    var colShipping = getActualCellIndex(orders, col);
                     break;
                 case "Grand":
-                    var colTotal = j;
+                    var colTotal = getActualCellIndex(orders, col);
                     break;
                 case "Order Status":
-                    var colStatus = j;
+                    var colStatus = getActualCellIndex(orders, col);
                     break;
                 case "Date":
-                    var colDate = j;
+                    var colDate = getActualCellIndex(orders, col);
                     break;
                 case "":
                     break;
